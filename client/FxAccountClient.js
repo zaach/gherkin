@@ -1,22 +1,8 @@
-define(['./lib/request', './vendor/sjcl', '../components/p/p', './lib/hkdf'], function (Request, sjcl, p, hkdf) {
+define(['./lib/request', './vendor/sjcl'], function (Request, sjcl) {
   'use strict';
-
-  var PREFIX_NAME = "identity.mozilla.com/picl/v1/";
 
   function str2hex(str) {
     return sjcl.codec.hex.fromBits(sjcl.codec.utf8String.toBits(str));
-  }
-
-  function deriveHawkCredentials(tokenHex, context, size) {
-    var token = hex2bits(tokenHex);
-    var out = hkdf(token, undefined, PREFIX_NAME + context, size || 2 * 32);
-
-    return {
-      algorithm: "sha256",
-      key: out.slice(32, 64),
-      extra: out.slice(64),
-      id: CommonUtils.bytesAsHex(out.slice(0, 32))
-    };
   }
 
   function FxAccountClient(uri, config) {

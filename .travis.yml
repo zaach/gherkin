@@ -24,6 +24,6 @@ install:
   - cd fxa-auth-server
   - npm install
   - node ./scripts/gen_keys.js
-  - npm start &
+  - DEV_VERIFIED=false npm start &
   - cd ..
   - npm install

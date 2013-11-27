@@ -36,7 +36,7 @@ define([
             return client.signIn(email, password);
           })
           .then(function (res) {
-            assert.ok(res.sessionToken);
+            assert.ok(res.sessionToken, "sessionToken is returned");
           });
       });
 
@@ -45,15 +45,31 @@ define([
         var email = user + '@restmail.net';
         var password = 'iliketurtles';
         var uid;
+        var sessionToken;
 
         return client.signUp(email, password)
           .then(function (result) {
             uid = result.uid;
+            return client.signIn(email, password);
+          })
+          .then(function (result) {
+            assert.ok(result.sessionToken, "sessionToken is returned");
+            sessionToken = result.sessionToken;
+            return client.recoveryEmailStatus(sessionToken);
+          })
+          .then(function (result) {
+            assert.equal(result.verified, false, "Email should be unverified.");
             return waitForEmail(user);
           })
           .then(function (emails) {
             var code = emails[0].html.match(/code=([A-Za-z0-9]+)/)[1];
             return client.verifyCode(uid, code);
+          })
+          .then(function () {
+            return client.recoveryEmailStatus(sessionToken);
+          })
+          .then(function (result) {
+            assert.equal(result.verified, true, "Email should be verified.");
           });
       });
 

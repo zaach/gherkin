@@ -35,6 +35,18 @@ define([
           });
       });
 
+      test('#hkdf empty salt', function () {
+
+        var ikm = sjcl.codec.utf8String.toBits('initialKeyingMaterial');
+        var info = sjcl.codec.utf8String.toBits('info');
+
+        return hkdf(ikm, info, undefined, 42)
+          .then(function (result) {
+            assert.equal(sjcl.codec.hex.fromBits(result).length, 84);
+            assert.equal(sjcl.codec.hex.fromBits(result), '5ff4745de6729d5a523337170ab6e12f202c81611bb8cb80e4b44675a16371cadd8e62eebc777b08bf83');
+          });
+      });
+
     });
   }
 });

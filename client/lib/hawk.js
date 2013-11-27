@@ -1,4 +1,4 @@
-define(['../vendor/cryptojs'], function (CryptoJS) {
+define(['../vendor/cryptojs', '../vendor/sjcl'], function (CryptoJS, sjcl) {
   'use strict';
 
   /*
@@ -287,14 +287,15 @@ define(['../vendor/cryptojs'], function (CryptoJS) {
 
     headerVersion: '1',
 
-    algorithms: ['sha1', 'sha256'],
+    algorithms: ['sha256'],
 
     calculateMac: function (type, credentials, options) {
 
       var normalized = hawk.crypto.generateNormalizedString(type, options);
 
-      var hmac = CryptoJS['Hmac' + credentials.algorithm.toUpperCase()](normalized, credentials.key);
-      return hmac.toString(CryptoJS.enc.Base64);
+      var hmac = new sjcl.misc.hmac(credentials.key, sjcl.hash.sha256);
+      hmac.update(normalized);
+      return sjcl.codec.base64.fromBits(hmac.digest());
     },
 
     generateNormalizedString: function (type, options) {

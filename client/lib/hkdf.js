@@ -1,6 +1,9 @@
 define(['../vendor/sjcl', '../../components/p/p'], function (sjcl, P) {
   'use strict';
 
+  // zeroed 32 byte salt
+  var zeroes = sjcl.codec.hex.toBits('0000000000000000000000000000000000000000000000000000000000000000');
+
   /**
    * hkdf - The HMAC-based Key Derivation Function
    * based on https://github.com/mozilla/node-hkdf
@@ -14,7 +17,7 @@ define(['../vendor/sjcl', '../../components/p/p'], function (sjcl, P) {
    */
   function hkdf(ikm, info, salt, length) {
 
-    var mac = new sjcl.misc.hmac(salt, sjcl.hash.sha256);
+    var mac = new sjcl.misc.hmac(salt || zeroes, sjcl.hash.sha256);
     mac.update(ikm);
 
     // compute the PRK

@@ -1,4 +1,4 @@
-define(['../vendor/cryptojs', '../vendor/sjcl'], function (CryptoJS, sjcl) {
+define(['../vendor/sjcl'], function (sjcl) {
   'use strict';
 
   /*
@@ -324,19 +324,19 @@ define(['../vendor/cryptojs', '../vendor/sjcl'], function (CryptoJS, sjcl) {
     },
 
     calculatePayloadHash: function (payload, algorithm, contentType) {
+      var hash = new sjcl.hash.sha256();
+      hash.update('hawk.' + hawk.crypto.headerVersion + '.payload\n')
+          .update(hawk.utils.parseContentType(contentType) + '\n')
+          .update(payload || '')
+          .update('\n');
 
-      var hash = CryptoJS.algo[algorithm.toUpperCase()].create();
-      hash.update('hawk.' + hawk.crypto.headerVersion + '.payload\n');
-      hash.update(hawk.utils.parseContentType(contentType) + '\n');
-      hash.update(payload || '');
-      hash.update('\n');
-      return hash.finalize().toString(CryptoJS.enc.Base64);
+      return sjcl.codec.base64.fromBits(hash.finalize());
     },
 
     calculateTsMac: function (ts, credentials) {
-
-      var hash = CryptoJS['Hmac' + credentials.algorithm.toUpperCase()]('hawk.' + hawk.crypto.headerVersion + '.ts\n' + ts + '\n', credentials.key);
-      return hash.toString(CryptoJS.enc.Base64);
+      var hmac = new sjcl.misc.hmac(credentials.key, sjcl.hash.sha256);
+      hmac.update('hawk.' + hawk.crypto.headerVersion + '.ts\n' + ts + '\n');
+      return sjcl.codec.base64.fromBits(hmac.digest());
     }
   };
 
